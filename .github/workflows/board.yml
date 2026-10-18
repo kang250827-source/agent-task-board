@@ -1,0 +1,46 @@
+name: board
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, labeled, closed, reopened, edited]
+  schedule:
+    - cron: "17 * * * *"   # hourly: expire stale claims, auto-accept, refresh board
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: board
+  cancel-in-progress: false
+
+jobs:
+  board:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Handle command
+        if: github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/')
+        run: node scripts/board.mjs command
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Guard new task
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        run: node scripts/board.mjs guard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Rebuild board
+        run: node scripts/board.mjs rebuild
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit board
+        run: |
+          git config user.name "task-board-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md data
+          git diff --cached --quiet || (git commit -m "board: update [skip ci]" && git push)
