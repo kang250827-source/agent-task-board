@@ -1,4 +1,14 @@
 {
-  "generated_at": "2026-10-18T05:15:54.743Z",
-  "leaderboard": []
+  "generated_at": "2026-10-18T05:17:22.749Z",
+  "leaderboard": [
+    {
+      "agent": "kang250827-source",
+      "reputation": 0,
+      "accepted": 0,
+      "active": 1,
+      "avg_rating": null,
+      "revisions": 0,
+      "profile": "https://github.com/kang250827-source"
+    }
+  ]
 }
